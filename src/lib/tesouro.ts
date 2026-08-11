@@ -73,7 +73,7 @@ export function calcularTotais(dias: Dias | null | undefined) {
   COLUMNS.forEach((c) => (totais[c.id] = 0));
   Object.values(dias || {}).forEach((linha) => {
     COLUMNS.forEach((c) => {
-      totais[c.id] += Number(linha?.[c.id] || 0);
+      totais[c.id] = (totais[c.id] ?? 0) + Number(linha?.[c.id] || 0);
     });
   });
   return totais;
