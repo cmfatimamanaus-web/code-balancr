@@ -78,6 +78,22 @@ export function PainelModerador({ onSair }: { onSair: () => void }) {
             style={{ background: COR.ivory, color: COR.ink }}
           />
         </div>
+        <div className="flex gap-2 mt-3">
+          {(["tabela", "graficos"] as const).map((k) => (
+            <button
+              key={k}
+              onClick={() => setAba(k)}
+              className="px-3 py-1.5 rounded-lg text-xs"
+              style={{
+                background: aba === k ? COR.goldSoft : "transparent",
+                color: aba === k ? COR.navyDeep : COR.goldSoft,
+                border: `1px solid ${aba === k ? COR.goldSoft : `${COR.goldSoft}66`}`,
+              }}
+            >
+              {k === "tabela" ? "Tabela de totais" : "Gráficos"}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="px-4 pt-4">
@@ -85,6 +101,8 @@ export function PainelModerador({ onSair }: { onSair: () => void }) {
           <p className="text-sm" style={{ color: COR.navyDeep }}>Carregando registros…</p>
         ) : erro ? (
           <p className="text-sm" style={{ color: "#8A1F1F" }}>{erro}</p>
+        ) : aba === "graficos" ? (
+          <GraficosModerador registrosMes={registros} mesIndex={mesIndex} ano={ano} />
         ) : registros.length === 0 ? (
           <p className="text-sm" style={{ color: `${COR.navyDeep}99` }}>
             Nenhum membro registrou o tesouro espiritual em {MESES[mesIndex]}/{ano} ainda.
