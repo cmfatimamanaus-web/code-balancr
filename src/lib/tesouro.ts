@@ -117,3 +117,49 @@ export async function listarRegistrosDoMes(mesIndex: number, ano: number) {
     .map((r) => ({ numero: r.numero as string, dias: (r.dias as Dias) || {} }))
     .sort((a, b) => a.numero.localeCompare(b.numero, undefined, { numeric: true }));
 }
+
+export async function listarRegistrosDoAno(ano: number) {
+  const { data, error } = await supabase
+    .from("registros")
+    .select("numero, mes_ano, dias")
+    .like("mes_ano", `%-${ano}`);
+  if (error) throw error;
+  return (data || []).map((r) => ({
+    numero: r.numero as string,
+    mesIndex: Number(String(r.mes_ano).split("-")[0]) - 1,
+    dias: (r.dias as Dias) || {},
+  }));
+}
+
+/* Dias em que a devoção foi cumprida (valor > 0) por coluna */
+export function contarDiasCumpridos(dias: Dias | null | undefined) {
+  const t: Record<string, number> = {};
+  COLUMNS.forEach((c) => (t[c.id] = 0));
+  Object.values(dias || {}).forEach((linha) => {
+    COLUMNS.forEach((c) => {
+      if (Number(linha?.[c.id] || 0) > 0) t[c.id] = (t[c.id] ?? 0) + 1;
+    });
+  });
+  return t;
+}
+
+/* % de adesão: dias cumpridos / (membros x dias do mês) */
+export function percentuaisDoMes(
+  registros: { dias: Dias }[],
+  mesIndex: number,
+  ano: number,
+) {
+  const base = registros.length * diasNoMes(mesIndex, ano);
+  const somas: Record<string, number> = {};
+  COLUMNS.forEach((c) => (somas[c.id] = 0));
+  registros.forEach((r) => {
+    const c = contarDiasCumpridos(r.dias);
+    COLUMNS.forEach((col) => (somas[col.id] = (somas[col.id] ?? 0) + (c[col.id] || 0)));
+  });
+  return COLUMNS.map((col) => ({
+    id: col.id,
+    nome: col.short,
+    completo: col.full,
+    percentual: base > 0 ? Math.round(((somas[col.id] ?? 0) / base) * 1000) / 10 : 0,
+  }));
+}
