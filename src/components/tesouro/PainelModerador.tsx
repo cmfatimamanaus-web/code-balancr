@@ -8,11 +8,13 @@ import {
   type Dias,
 } from "@/lib/tesouro";
 import { ShieldMark } from "./Shared";
+import { GraficosModerador } from "./GraficosModerador";
 
 export function PainelModerador({ onSair }: { onSair: () => void }) {
   const hoje = new Date();
   const [mesIndex, setMesIndex] = useState(hoje.getMonth());
   const [ano, setAno] = useState(hoje.getFullYear());
+  const [aba, setAba] = useState<"tabela" | "graficos">("tabela");
   const [carregando, setCarregando] = useState(true);
   const [registros, setRegistros] = useState<{ numero: string; dias: Dias }[]>([]);
   const [erro, setErro] = useState("");
