@@ -154,12 +154,12 @@ export function percentuaisDoMes(
   COLUMNS.forEach((c) => (somas[c.id] = 0));
   registros.forEach((r) => {
     const c = contarDiasCumpridos(r.dias);
-    COLUMNS.forEach((col) => (somas[col.id] += c[col.id] || 0));
+    COLUMNS.forEach((col) => (somas[col.id] = (somas[col.id] ?? 0) + (c[col.id] || 0)));
   });
   return COLUMNS.map((col) => ({
     id: col.id,
     nome: col.short,
     completo: col.full,
-    percentual: base > 0 ? Math.round((somas[col.id] / base) * 1000) / 10 : 0,
+    percentual: base > 0 ? Math.round(((somas[col.id] ?? 0) / base) * 1000) / 10 : 0,
   }));
 }
