@@ -79,13 +79,56 @@ export function calcularTotais(dias: Dias | null | undefined) {
   return totais;
 }
 
+/* ============ Autenticação por número + senha ============ */
+
+export function normalizarNumero(numero: string) {
+  return numero.trim().toLowerCase().replace(/[^0-9a-z-]/g, "");
+}
+
+export function emailDoNumero(numero: string) {
+  return `${normalizarNumero(numero)}@tesouro.local`;
+}
+
+export async function criarConta(numero: string, senha: string) {
+  const { error } = await supabase.auth.signUp({
+    email: emailDoNumero(numero),
+    password: senha,
+    options: { data: { numero: normalizarNumero(numero) } },
+  });
+  if (error) throw error;
+}
+
+export async function entrarComNumero(numero: string, senha: string) {
+  const { error } = await supabase.auth.signInWithPassword({
+    email: emailDoNumero(numero),
+    password: senha,
+  });
+  if (error) throw error;
+}
+
+export async function sairDaConta() {
+  await supabase.auth.signOut();
+}
+
+export async function usuarioAtual() {
+  const { data } = await supabase.auth.getUser();
+  if (!data.user) return null;
+  const numero =
+    (data.user.user_metadata?.["numero"] as string | undefined) ??
+    String(data.user.email ?? "").split("@")[0] ??
+    "";
+  return { id: data.user.id, numero };
+}
+
 /* ============ Acesso aos dados (Lovable Cloud) ============ */
 
-export async function carregarRegistro(numero: string, mesIndex: number, ano: number) {
+export async function carregarRegistro(mesIndex: number, ano: number) {
+  const { data: auth } = await supabase.auth.getUser();
+  if (!auth.user) throw new Error("Sem sessão");
   const { data, error } = await supabase
     .from("registros")
     .select("dias")
-    .eq("numero", numero)
+    .eq("user_id", auth.user.id)
     .eq("mes_ano", mesAnoKey(mesIndex, ano))
     .maybeSingle();
   if (error) throw error;
@@ -98,38 +141,17 @@ export async function salvarRegistro(
   ano: number,
   dias: Dias,
 ) {
+  const { data: auth } = await supabase.auth.getUser();
+  if (!auth.user) throw new Error("Sem sessão");
   const { error } = await supabase
     .from("registros")
     .upsert(
-      { numero, mes_ano: mesAnoKey(mesIndex, ano), dias },
-      { onConflict: "numero,mes_ano" },
+      { user_id: auth.user.id, numero, mes_ano: mesAnoKey(mesIndex, ano), dias },
+      { onConflict: "user_id,mes_ano" },
     );
   if (error) throw error;
 }
 
-export async function listarRegistrosDoMes(mesIndex: number, ano: number) {
-  const { data, error } = await supabase
-    .from("registros")
-    .select("numero, dias")
-    .eq("mes_ano", mesAnoKey(mesIndex, ano));
-  if (error) throw error;
-  return (data || [])
-    .map((r) => ({ numero: r.numero as string, dias: (r.dias as Dias) || {} }))
-    .sort((a, b) => a.numero.localeCompare(b.numero, undefined, { numeric: true }));
-}
-
-export async function listarRegistrosDoAno(ano: number) {
-  const { data, error } = await supabase
-    .from("registros")
-    .select("numero, mes_ano, dias")
-    .like("mes_ano", `%-${ano}`);
-  if (error) throw error;
-  return (data || []).map((r) => ({
-    numero: r.numero as string,
-    mesIndex: Number(String(r.mes_ano).split("-")[0]) - 1,
-    dias: (r.dias as Dias) || {},
-  }));
-}
 
 /* Dias em que a devoção foi cumprida (valor > 0) por coluna */
 export function contarDiasCumpridos(dias: Dias | null | undefined) {
