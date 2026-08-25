@@ -1,13 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   MODERADOR_SENHA_PADRAO,
   carregarRegistro,
   entradaVazia,
+  sairDaConta,
   salvarRegistro,
+  usuarioAtual,
   type Dias,
 } from "@/lib/tesouro";
 import { Home } from "@/components/tesouro/Home";
+import { AutenticacaoMembro } from "@/components/tesouro/AutenticacaoMembro";
 import { IdentificacaoMembro } from "@/components/tesouro/IdentificacaoMembro";
 import { GradeRegistro } from "@/components/tesouro/GradeRegistro";
 import { LoginModerador } from "@/components/tesouro/LoginModerador";
@@ -20,13 +23,13 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Registro anônimo das devoções diárias dos membros da Congregação Mariana, com consolidado mensal para o responsável.",
+          "Registro pessoal das devoções diárias dos membros da Congregação Mariana, com consolidado mensal para o responsável.",
       },
       { property: "og:title", content: "Tesouro Espiritual — Congregação Mariana" },
       {
         property: "og:description",
         content:
-          "Marque suas devoções diárias pelo seu número e acompanhe o total do mês. Consolidado mensal para o responsável.",
+          "Entre com o seu número e senha, marque suas devoções diárias e acompanhe o total do mês.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -35,8 +38,10 @@ export const Route = createFileRoute("/")({
   component: TesouroEspiritualApp,
 });
 
+type Tela = "home" | "auth" | "identificacao" | "grade" | "login-mod" | "painel-mod";
+
 function TesouroEspiritualApp() {
-  const [tela, setTela] = useState<"home" | "identificacao" | "grade" | "login-mod" | "painel-mod">("home");
+  const [tela, setTela] = useState<Tela>("home");
   const [numero, setNumero] = useState<string>("");
   const [mesIndex, setMesIndex] = useState(0);
   const [ano, setAno] = useState(new Date().getFullYear());
@@ -45,14 +50,26 @@ function TesouroEspiritualApp() {
   const [salvando, setSalvando] = useState(false);
   const [erroGrade, setErroGrade] = useState("");
   const [erroLogin, setErroLogin] = useState("");
+  const [senhaMod, setSenhaMod] = useState("");
   const saveTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const abrirRegistro = async (num: string, mIdx: number, a: number) => {
+  useEffect(() => {
+    usuarioAtual().then((u) => u && setNumero(u.numero));
+  }, []);
+
+  const entrarNoApp = async () => {
+    const u = await usuarioAtual();
+    if (u) {
+      setNumero(u.numero);
+      setTela("identificacao");
+    }
+  };
+
+  const abrirRegistro = async (mIdx: number, a: number) => {
     setCarregandoAbertura(true);
     setErroGrade("");
     try {
-      const carregados = await carregarRegistro(num, mIdx, a);
-      setNumero(num);
+      const carregados = await carregarRegistro(mIdx, a);
       setMesIndex(mIdx);
       setAno(a);
       setDias(carregados || entradaVazia(mIdx, a));
@@ -96,11 +113,23 @@ function TesouroEspiritualApp() {
     });
   };
 
+  const sair = async () => {
+    await sairDaConta();
+    setNumero("");
+    setDias(null);
+    setTela("home");
+  };
+
+  if (tela === "auth") {
+    return <AutenticacaoMembro onEntrou={entrarNoApp} onVoltar={() => setTela("home")} />;
+  }
+
   if (tela === "identificacao") {
     return (
       <IdentificacaoMembro
+        numero={numero}
         carregando={carregandoAbertura}
-        onVoltar={() => setTela("home")}
+        onVoltar={sair}
         onConfirmar={abrirRegistro}
       />
     );
@@ -130,24 +159,29 @@ function TesouroEspiritualApp() {
           setTela("home");
         }}
         onEntrar={(senha) => {
-          if (senha === MODERADOR_SENHA_PADRAO) {
-            setErroLogin("");
-            setTela("painel-mod");
-          } else {
-            setErroLogin("Senha incorreta.");
+          if (senha.trim().length === 0) {
+            setErroLogin("Informe a senha.");
+            return;
           }
+          setErroLogin("");
+          setSenhaMod(senha);
+          setTela("painel-mod");
         }}
       />
     );
   }
 
   if (tela === "painel-mod") {
-    return <PainelModerador onSair={() => setTela("home")} />;
+    return <PainelModerador senha={senhaMod || MODERADOR_SENHA_PADRAO} onSair={() => setTela("home")} />;
   }
 
   return (
     <Home
-      onEntrarMembro={() => setTela("identificacao")}
+      onEntrarMembro={async () => {
+        const u = await usuarioAtual();
+        setTela(u ? "identificacao" : "auth");
+        if (u) setNumero(u.numero);
+      }}
       onEntrarModerador={() => setTela("login-mod")}
     />
   );
