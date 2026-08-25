@@ -116,7 +116,7 @@ export function PainelModerador({ senha, onSair }: { senha: string; onSair: () =
         ) : erro ? (
           <p className="text-sm" style={{ color: "#8A1F1F" }}>{erro}</p>
         ) : aba === "graficos" ? (
-          <GraficosModerador registrosMes={registros} mesIndex={mesIndex} ano={ano} />
+          <GraficosModerador registrosMes={registros} anoDados={anoDados} mesIndex={mesIndex} ano={ano} />
         ) : registros.length === 0 ? (
           <p className="text-sm" style={{ color: `${COR.navyDeep}99` }}>
             Nenhum membro registrou o tesouro espiritual em {MESES[mesIndex]}/{ano} ainda.
