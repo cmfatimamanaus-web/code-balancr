@@ -1,39 +1,53 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import {
   COLUMNS,
   COR,
   MESES,
   calcularTotais,
-  listarRegistrosDoMes,
+  mesAnoKey,
   type Dias,
 } from "@/lib/tesouro";
+import { consolidadoModerador } from "@/lib/moderador.functions";
 import { ShieldMark } from "./Shared";
-import { GraficosModerador } from "./GraficosModerador";
+import { GraficosModerador, type RegistroAno } from "./GraficosModerador";
 
-export function PainelModerador({ onSair }: { onSair: () => void }) {
+export function PainelModerador({ senha, onSair }: { senha: string; onSair: () => void }) {
   const hoje = new Date();
   const [mesIndex, setMesIndex] = useState(hoje.getMonth());
   const [ano, setAno] = useState(hoje.getFullYear());
   const [aba, setAba] = useState<"tabela" | "graficos">("tabela");
   const [carregando, setCarregando] = useState(true);
   const [registros, setRegistros] = useState<{ numero: string; dias: Dias }[]>([]);
+  const [anoDados, setAnoDados] = useState<RegistroAno[]>([]);
   const [erro, setErro] = useState("");
+  const buscar = useServerFn(consolidadoModerador);
 
   const carregar = useCallback(async () => {
     setCarregando(true);
     setErro("");
     try {
-      setRegistros(await listarRegistrosDoMes(mesIndex, ano));
+      const [doMes, doAno] = await Promise.all([
+        buscar({ data: { senha, mesAno: mesAnoKey(mesIndex, ano) } }),
+        buscar({ data: { senha, ano } }),
+      ]);
+      setRegistros(
+        doMes
+          .map((r) => ({ numero: r.numero, dias: (r.dias || {}) as Dias }))
+          .sort((a, b) => a.numero.localeCompare(b.numero, undefined, { numeric: true })),
+      );
+      setAnoDados(doAno.map((r) => ({ ...r, dias: (r.dias || {}) as Dias })));
     } catch {
       setErro("Não foi possível carregar os dados agora.");
     } finally {
       setCarregando(false);
     }
-  }, [mesIndex, ano]);
+  }, [mesIndex, ano, senha, buscar]);
 
   useEffect(() => {
     carregar();
   }, [carregar]);
+
 
   const totalPorMembro = useMemo(
     () => registros.map((r) => ({ numero: r.numero, totais: calcularTotais(r.dias) })),
