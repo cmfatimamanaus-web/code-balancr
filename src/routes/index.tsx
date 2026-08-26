@@ -14,6 +14,7 @@ import { AutenticacaoMembro } from "@/components/tesouro/AutenticacaoMembro";
 import { GradeRegistro } from "@/components/tesouro/GradeRegistro";
 import { LoginModerador } from "@/components/tesouro/LoginModerador";
 import { PainelModerador } from "@/components/tesouro/PainelModerador";
+import { verificarSenhaModerador } from "@/lib/moderador.functions";
 
 export const Route = createFileRoute("/")({
   head: () => ({
