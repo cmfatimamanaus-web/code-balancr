@@ -148,9 +148,19 @@ function TesouroEspiritualApp() {
           setErroLogin("");
           setTela("home");
         }}
-        onEntrar={(senha) => {
+        onEntrar={async (senha) => {
           if (senha.trim().length === 0) {
             setErroLogin("Informe a senha.");
+            return;
+          }
+          try {
+            const { ok } = await verificarSenhaModerador({ data: { senha } });
+            if (!ok) {
+              setErroLogin("Senha incorreta.");
+              return;
+            }
+          } catch {
+            setErroLogin("Não foi possível validar a senha agora.");
             return;
           }
           setErroLogin("");
