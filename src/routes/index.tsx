@@ -11,7 +11,6 @@ import {
 } from "@/lib/tesouro";
 import { Home } from "@/components/tesouro/Home";
 import { AutenticacaoMembro } from "@/components/tesouro/AutenticacaoMembro";
-import { IdentificacaoMembro } from "@/components/tesouro/IdentificacaoMembro";
 import { GradeRegistro } from "@/components/tesouro/GradeRegistro";
 import { LoginModerador } from "@/components/tesouro/LoginModerador";
 import { PainelModerador } from "@/components/tesouro/PainelModerador";
@@ -38,13 +37,14 @@ export const Route = createFileRoute("/")({
   component: TesouroEspiritualApp,
 });
 
-type Tela = "home" | "auth" | "identificacao" | "grade" | "login-mod" | "painel-mod";
+type Tela = "home" | "auth" | "grade" | "login-mod" | "painel-mod";
 
 function TesouroEspiritualApp() {
+  const hoje = new Date();
   const [tela, setTela] = useState<Tela>("home");
   const [numero, setNumero] = useState<string>("");
-  const [mesIndex, setMesIndex] = useState(0);
-  const [ano, setAno] = useState(new Date().getFullYear());
+  const [mesIndex, setMesIndex] = useState(hoje.getMonth());
+  const [ano, setAno] = useState(hoje.getFullYear());
   const [dias, setDias] = useState<Dias | null>(null);
   const [carregandoAbertura, setCarregandoAbertura] = useState(false);
   const [salvando, setSalvando] = useState(false);
@@ -53,19 +53,7 @@ function TesouroEspiritualApp() {
   const [senhaMod, setSenhaMod] = useState("");
   const saveTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => {
-    usuarioAtual().then((u) => u && setNumero(u.numero));
-  }, []);
-
-  const entrarNoApp = async () => {
-    const u = await usuarioAtual();
-    if (u) {
-      setNumero(u.numero);
-      setTela("identificacao");
-    }
-  };
-
-  const abrirRegistro = async (mIdx: number, a: number) => {
+  const abrirRegistro = useCallback(async (mIdx: number, a: number) => {
     setCarregandoAbertura(true);
     setErroGrade("");
     try {
@@ -79,7 +67,18 @@ function TesouroEspiritualApp() {
     } finally {
       setCarregandoAbertura(false);
     }
-  };
+  }, []);
+
+  const entrarNoApp = useCallback(async () => {
+    const u = await usuarioAtual();
+    if (!u) return;
+    setNumero(u.numero);
+    await abrirRegistro(hoje.getMonth(), hoje.getFullYear());
+  }, [abrirRegistro]);
+
+  useEffect(() => {
+    usuarioAtual().then((u) => u && setNumero(u.numero));
+  }, []);
 
   const salvar = useCallback(
     (novosDias: Dias) => {
@@ -124,17 +123,6 @@ function TesouroEspiritualApp() {
     return <AutenticacaoMembro onEntrou={entrarNoApp} onVoltar={() => setTela("home")} />;
   }
 
-  if (tela === "identificacao") {
-    return (
-      <IdentificacaoMembro
-        numero={numero}
-        carregando={carregandoAbertura}
-        onVoltar={sair}
-        onConfirmar={abrirRegistro}
-      />
-    );
-  }
-
   if (tela === "grade" && dias) {
     return (
       <GradeRegistro
@@ -142,8 +130,10 @@ function TesouroEspiritualApp() {
         mesIndex={mesIndex}
         ano={ano}
         dias={dias}
+        carregando={carregandoAbertura}
+        onMudarPeriodo={abrirRegistro}
         onMudarDia={mudarDia}
-        onVoltar={() => setTela("identificacao")}
+        onVoltar={sair}
         salvando={salvando}
         erro={erroGrade}
       />
@@ -179,8 +169,12 @@ function TesouroEspiritualApp() {
     <Home
       onEntrarMembro={async () => {
         const u = await usuarioAtual();
-        setTela(u ? "identificacao" : "auth");
-        if (u) setNumero(u.numero);
+        if (u) {
+          setNumero(u.numero);
+          await abrirRegistro(hoje.getMonth(), hoje.getFullYear());
+        } else {
+          setTela("auth");
+        }
       }}
       onEntrarModerador={() => setTela("login-mod")}
     />

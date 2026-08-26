@@ -7,6 +7,8 @@ export function GradeRegistro({
   mesIndex,
   ano,
   dias,
+  carregando,
+  onMudarPeriodo,
   onMudarDia,
   onVoltar,
   salvando,
@@ -16,6 +18,8 @@ export function GradeRegistro({
   mesIndex: number;
   ano: number;
   dias: Dias;
+  carregando?: boolean;
+  onMudarPeriodo: (mesIndex: number, ano: number) => void;
   onMudarDia: (dia: number, colId: string, valor: number) => void;
   onVoltar: () => void;
   salvando: boolean;
@@ -38,15 +42,34 @@ export function GradeRegistro({
         style={{ background: COR.navyDeep, boxShadow: "0 2px 10px rgba(0,0,0,0.25)" }}
       >
         <div className="flex items-center justify-between mb-2">
-          <button onClick={onVoltar} className="text-sm" style={{ color: COR.goldSoft }}>← Trocar</button>
+          <button onClick={onVoltar} className="text-sm" style={{ color: COR.goldSoft }}>← Sair</button>
           <div className="text-right">
             <div className="text-sm" style={{ color: COR.ivory, fontFamily: "Georgia, serif" }}>
               Nº {numero}
             </div>
             <div className="text-xs" style={{ color: `${COR.ivory}99` }}>
-              {MESES[mesIndex]} / {ano}
+              {carregando ? "Abrindo…" : `${MESES[mesIndex]} / ${ano}`}
             </div>
           </div>
+        </div>
+        <div className="grid grid-cols-2 gap-2 mb-2">
+          <select
+            value={mesIndex}
+            onChange={(e) => onMudarPeriodo(Number(e.target.value), ano)}
+            className="px-2 py-1.5 rounded-md text-sm outline-none"
+            style={{ background: COR.ivory, color: COR.ink }}
+          >
+            {MESES.map((m, i) => (
+              <option key={m} value={i}>{m}</option>
+            ))}
+          </select>
+          <input
+            type="number"
+            value={ano}
+            onChange={(e) => onMudarPeriodo(mesIndex, Number(e.target.value) || ano)}
+            className="px-2 py-1.5 rounded-md text-sm outline-none"
+            style={{ background: COR.ivory, color: COR.ink }}
+          />
         </div>
         <div className="flex items-center justify-between text-xs" style={{ color: COR.goldSoft }}>
           <span>{salvando ? "Salvando…" : "Salvo"}</span>

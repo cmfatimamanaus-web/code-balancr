@@ -8,7 +8,7 @@ import {
   mesAnoKey,
   type Dias,
 } from "@/lib/tesouro";
-import { consolidadoModerador } from "@/lib/moderador.functions";
+import { consolidadoModerador, excluirMembro } from "@/lib/moderador.functions";
 import { ShieldMark } from "./Shared";
 import { GraficosModerador, type RegistroAno } from "./GraficosModerador";
 
@@ -16,12 +16,14 @@ export function PainelModerador({ senha, onSair }: { senha: string; onSair: () =
   const hoje = new Date();
   const [mesIndex, setMesIndex] = useState(hoje.getMonth());
   const [ano, setAno] = useState(hoje.getFullYear());
-  const [aba, setAba] = useState<"tabela" | "graficos">("tabela");
+  const [aba, setAba] = useState<"tabela" | "graficos" | "comparativos">("tabela");
   const [carregando, setCarregando] = useState(true);
   const [registros, setRegistros] = useState<{ numero: string; dias: Dias }[]>([]);
   const [anoDados, setAnoDados] = useState<RegistroAno[]>([]);
   const [erro, setErro] = useState("");
   const buscar = useServerFn(consolidadoModerador);
+  const excluir = useServerFn(excluirMembro);
+  const [excluindo, setExcluindo] = useState("");
 
   const carregar = useCallback(async () => {
     setCarregando(true);
@@ -48,6 +50,19 @@ export function PainelModerador({ senha, onSair }: { senha: string; onSair: () =
     carregar();
   }, [carregar]);
 
+
+  const removerMembro = async (num: string) => {
+    if (!window.confirm(`Excluir todos os registros do nº ${num}? Esta ação não pode ser desfeita.`)) return;
+    setExcluindo(num);
+    try {
+      await excluir({ data: { senha, numero: num } });
+      await carregar();
+    } catch {
+      setErro("Não foi possível excluir esse número agora.");
+    } finally {
+      setExcluindo("");
+    }
+  };
 
   const totalPorMembro = useMemo(
     () => registros.map((r) => ({ numero: r.numero, totais: calcularTotais(r.dias) })),
@@ -93,7 +108,7 @@ export function PainelModerador({ senha, onSair }: { senha: string; onSair: () =
           />
         </div>
         <div className="flex gap-2 mt-3">
-          {(["tabela", "graficos"] as const).map((k) => (
+          {(["tabela", "graficos", "comparativos"] as const).map((k) => (
             <button
               key={k}
               onClick={() => setAba(k)}
@@ -104,7 +119,7 @@ export function PainelModerador({ senha, onSair }: { senha: string; onSair: () =
                 border: `1px solid ${aba === k ? COR.goldSoft : `${COR.goldSoft}66`}`,
               }}
             >
-              {k === "tabela" ? "Tabela de totais" : "Gráficos"}
+              {k === "tabela" ? "Tabela" : k === "graficos" ? "Gráficos do mês" : "Comparativos"}
             </button>
           ))}
         </div>
@@ -116,7 +131,9 @@ export function PainelModerador({ senha, onSair }: { senha: string; onSair: () =
         ) : erro ? (
           <p className="text-sm" style={{ color: "#8A1F1F" }}>{erro}</p>
         ) : aba === "graficos" ? (
-          <GraficosModerador registrosMes={registros} anoDados={anoDados} mesIndex={mesIndex} ano={ano} />
+          <GraficosModerador registrosMes={registros} anoDados={anoDados} mesIndex={mesIndex} ano={ano} modo="mes" />
+        ) : aba === "comparativos" ? (
+          <GraficosModerador registrosMes={registros} anoDados={anoDados} mesIndex={mesIndex} ano={ano} modo="comparativo" />
         ) : registros.length === 0 ? (
           <p className="text-sm" style={{ color: `${COR.navyDeep}99` }}>
             Nenhum membro registrou o tesouro espiritual em {MESES[mesIndex]}/{ano} ainda.
@@ -146,6 +163,12 @@ export function PainelModerador({ senha, onSair }: { senha: string; onSair: () =
                         {c.short}
                       </th>
                     ))}
+                    <th
+                      className="px-2 py-2 text-[11px] font-medium text-center"
+                      style={{ background: COR.navy, color: COR.ivory, minWidth: 60 }}
+                    >
+                      Excluir
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -162,6 +185,16 @@ export function PainelModerador({ senha, onSair }: { senha: string; onSair: () =
                           {m.totais[c.id]}
                         </td>
                       ))}
+                      <td className="px-2 py-1.5 text-center">
+                        <button
+                          onClick={() => removerMembro(m.numero)}
+                          disabled={excluindo === m.numero}
+                          className="text-xs px-2 py-1 rounded-md border disabled:opacity-50"
+                          style={{ borderColor: "#8A1F1F55", color: "#8A1F1F" }}
+                        >
+                          {excluindo === m.numero ? "…" : "Excluir"}
+                        </button>
+                      </td>
                     </tr>
                   ))}
                   <tr>
@@ -180,6 +213,7 @@ export function PainelModerador({ senha, onSair }: { senha: string; onSair: () =
                         {totalGeral[c.id]}
                       </td>
                     ))}
+                    <td style={{ background: COR.goldSoft }} />
                   </tr>
                 </tbody>
               </table>

@@ -29,11 +29,13 @@ export function GraficosModerador({
   anoDados,
   mesIndex,
   ano,
+  modo = "tudo",
 }: {
   registrosMes: { numero: string; dias: Dias }[];
   anoDados: RegistroAno[];
   mesIndex: number;
   ano: number;
+  modo?: "mes" | "comparativo" | "tudo";
 }) {
   const dadosMes = useMemo(
     () => percentuaisDoMes(registrosMes, mesIndex, ano),
@@ -86,8 +88,12 @@ export function GraficosModerador({
 
   const cor = (p: number) => (p >= 70 ? COR.gold : p >= 40 ? COR.goldSoft : `${COR.navy}66`);
 
+  const verMes = modo === "mes" || modo === "tudo";
+  const verComparativo = modo === "comparativo" || modo === "tudo";
+
   return (
     <div className="space-y-6">
+      {verMes && (
       <section
         className="rounded-lg border p-3"
         style={{ borderColor: `${COR.navy}22`, background: COR.ivory }}
@@ -126,7 +132,9 @@ export function GraficosModerador({
           </ResponsiveContainer>
         </div>
       </section>
+      )}
 
+      {verComparativo && (
       <section
         className="rounded-lg border p-3"
         style={{ borderColor: `${COR.navy}22`, background: COR.ivory }}
@@ -159,7 +167,9 @@ export function GraficosModerador({
           </ResponsiveContainer>
         </div>
       </section>
+      )}
 
+      {verComparativo && (
       <section>
         <h2 className="text-sm mb-1" style={{ color: COR.navyDeep, fontFamily: "Georgia, serif" }}>
           Cada devoção ao longo de {ano}
@@ -204,6 +214,7 @@ export function GraficosModerador({
           ))}
         </div>
       </section>
+      )}
     </div>
   );
 }

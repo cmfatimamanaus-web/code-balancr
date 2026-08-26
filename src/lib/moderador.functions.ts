@@ -26,3 +26,16 @@ export const consolidadoModerador = createServerFn({ method: "POST" })
       dias: (r.dias ?? {}) as Record<string, Record<string, number>>,
     }));
   });
+
+export const excluirMembro = createServerFn({ method: "POST" })
+  .inputValidator((input: { senha: string; numero: string }) => input)
+  .handler(async ({ data }) => {
+    validarSenha(data.senha);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
+      .from("registros")
+      .delete()
+      .eq("numero", data.numero);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
