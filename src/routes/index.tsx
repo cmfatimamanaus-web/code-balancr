@@ -14,6 +14,7 @@ import { AutenticacaoMembro } from "@/components/tesouro/AutenticacaoMembro";
 import { GradeRegistro } from "@/components/tesouro/GradeRegistro";
 import { LoginModerador } from "@/components/tesouro/LoginModerador";
 import { PainelModerador } from "@/components/tesouro/PainelModerador";
+import { verificarSenhaModerador } from "@/lib/moderador.functions";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -148,9 +149,19 @@ function TesouroEspiritualApp() {
           setErroLogin("");
           setTela("home");
         }}
-        onEntrar={(senha) => {
+        onEntrar={async (senha) => {
           if (senha.trim().length === 0) {
             setErroLogin("Informe a senha.");
+            return;
+          }
+          try {
+            const { ok } = await verificarSenhaModerador({ data: { senha } });
+            if (!ok) {
+              setErroLogin("Senha incorreta.");
+              return;
+            }
+          } catch {
+            setErroLogin("Não foi possível validar a senha agora.");
             return;
           }
           setErroLogin("");

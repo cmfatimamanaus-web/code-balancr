@@ -39,3 +39,10 @@ export const excluirMembro = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+export const verificarSenhaModerador = createServerFn({ method: "POST" })
+  .inputValidator((input: { senha: string }) => input)
+  .handler(async ({ data }) => {
+    const esperada = process.env["MODERADOR_SENHA"] ?? "responsavel2026";
+    return { ok: data.senha === esperada };
+  });
