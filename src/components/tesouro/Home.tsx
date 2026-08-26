@@ -16,11 +16,8 @@ export function Home({
       }}
     >
       <div className="flex flex-col items-center text-center max-w-sm w-full">
-        <div
-          className="rounded-full p-4 mb-6"
-          style={{ background: COR.ivory, boxShadow: `0 0 0 3px ${COR.gold}55, 0 12px 40px rgba(0,0,0,0.45)` }}
-        >
-          <ShieldMark size={92} />
+        <div className="mb-6" style={{ filter: "drop-shadow(0 14px 34px rgba(0,0,0,0.45))" }}>
+          <ShieldMark size={170} />
         </div>
         <h1
           className="text-3xl leading-tight"
