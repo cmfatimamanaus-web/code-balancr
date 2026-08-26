@@ -7,6 +7,8 @@ export function GradeRegistro({
   mesIndex,
   ano,
   dias,
+  carregando,
+  onMudarPeriodo,
   onMudarDia,
   onVoltar,
   salvando,
@@ -16,6 +18,8 @@ export function GradeRegistro({
   mesIndex: number;
   ano: number;
   dias: Dias;
+  carregando?: boolean;
+  onMudarPeriodo: (mesIndex: number, ano: number) => void;
   onMudarDia: (dia: number, colId: string, valor: number) => void;
   onVoltar: () => void;
   salvando: boolean;
