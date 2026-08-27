@@ -19,7 +19,7 @@ export const COLUMNS: Coluna[] = [
   { id: "missa", short: "Missa", full: "Missa", type: "check" },
   { id: "comun", short: "Comun.", full: "Comunhão", type: "check" },
   { id: "visitaSSmo", short: "Vis. SSmo", full: "Visita ao Santíssimo", type: "check" },
-  { id: "terco", short: "Terço", full: "Terço", type: "check" },
+  { id: "terco", short: "Terço", full: "Terço (nº de terços rezados no dia)", type: "num" },
   { id: "oficio", short: "Ofício", full: "Ofício (nº de partes rezadas no dia)", type: "num" },
   { id: "jejum", short: "Jejum", full: "Jejum", type: "check" },
   { id: "abst", short: "Abst.", full: "Abstinência", type: "check" },
