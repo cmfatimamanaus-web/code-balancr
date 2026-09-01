@@ -14,6 +14,69 @@ export type Database = {
   }
   public: {
     Tables: {
+      passkey_desafios: {
+        Row: {
+          created_at: string
+          desafio: string
+          expira_em: string
+          id: string
+          referencia: string
+          tipo: string
+        }
+        Insert: {
+          created_at?: string
+          desafio: string
+          expira_em?: string
+          id?: string
+          referencia: string
+          tipo: string
+        }
+        Update: {
+          created_at?: string
+          desafio?: string
+          expira_em?: string
+          id?: string
+          referencia?: string
+          tipo?: string
+        }
+        Relationships: []
+      }
+      passkeys: {
+        Row: {
+          counter: number
+          created_at: string
+          credential_id: string
+          id: string
+          numero: string
+          public_key: string
+          transports: string[]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          counter?: number
+          created_at?: string
+          credential_id: string
+          id?: string
+          numero: string
+          public_key: string
+          transports?: string[]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          counter?: number
+          created_at?: string
+          credential_id?: string
+          id?: string
+          numero?: string
+          public_key?: string
+          transports?: string[]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       registros: {
         Row: {
           created_at: string
