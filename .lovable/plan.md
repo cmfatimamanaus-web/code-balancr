@@ -1,34 +1,26 @@
-# Entrar só com o número + passkey
+# Login com número + senha OU passkey
 
-Hoje o membro cria conta com número e senha. A proposta: o número passa a ser a única coisa digitada, e a confirmação de identidade é feita pelo passkey do aparelho (digital, Face ID ou PIN do celular/computador).
+Manter o login atual (número + senha) e adicionar o passkey como forma alternativa de entrar, opcional para cada membro.
 
 ## Como fica para o membro
 
-1. **Primeiro acesso**: digita o número (ex.: 07) e toca em "Criar meu acesso". O celular pede a digital/Face ID e guarda o passkey.
-2. **Próximos acessos**: digita o número, toca em "Entrar", confirma com a digital — e cai direto no tesouro daquele número.
-3. **Novo aparelho**: pode registrar um passkey adicional para o mesmo número, desde que já esteja logado em um aparelho antigo. Se perder todos os aparelhos, o responsável libera um novo cadastro (ver abaixo).
+1. Tela de entrada: campo do número e senha, com o botão "Entrar com passkey" logo abaixo.
+2. Quem já tem conta continua entrando normalmente com a senha.
+3. Depois de entrar, aparece na grade um botão "Ativar passkey neste aparelho" (biometria/PIN do celular). A partir daí, nas próximas vezes basta digitar o número e tocar em "Entrar com passkey".
+4. A senha continua valendo sempre como reserva — se o membro trocar de celular e perder o passkey, entra com a senha e ativa o passkey de novo.
 
-Nenhuma senha é digitada em nenhum momento.
+## Área do responsável
 
-## O que muda na área do responsável
-
-- Na tabela, além de "Excluir", um botão **"Liberar novo passkey"**: apaga os passkeys daquele número para que a pessoa possa registrar o aparelho novo sem perder os registros já feitos.
-- A entrada do responsável continua com a senha atual (não mexo nela agora).
-
-## Pontos importantes antes de aprovar
-
-- Passkey exige site em HTTPS — a versão publicada funciona; no preview do editor funciona no mesmo domínio.
-- Aparelhos muito antigos podem não suportar. Nesse caso a tela mostra um aviso claro em vez de quebrar.
-- Se alguém perder o aparelho e não tiver outro, só o responsável consegue liberar de novo. Isso é intencional: sem e-mail não existe recuperação automática.
-- As contas com senha que já existem continuam válidas: na primeira entrada com senha o app oferece "cadastrar passkey neste aparelho". A tela de senha fica escondida atrás de um link "Entrar com senha (contas antigas)".
+- Sem mudança de fluxo; a exclusão de um número passa a remover também os passkeys daquele número.
 
 ## Detalhes técnicos
 
-- Biblioteca `@simplewebauthn/server` + `@simplewebauthn/browser` (compatíveis com o runtime de borda).
-- Nova tabela `passkeys` (`numero`, `credential_id`, `public_key`, `counter`, `transports`, `user_id`) com RLS restrita — leitura/escrita só pelo servidor; e tabela curta `passkey_desafios` para os challenges (expiração de 5 min).
-- Rotas de servidor em `src/routes/api/public/passkey/*`: `registro-opcoes`, `registro-verificar`, `login-opcoes`, `login-verificar`. Cada uma valida entrada com Zod e o challenge é sempre conferido no servidor.
-- Após verificação bem-sucedida no login, o servidor gera um link de acesso pelo Auth Admin para o e-mail sintético `numero@tesouro.local` e devolve o `token_hash`; o cliente chama `verifyOtp` para abrir a sessão Supabase. O resto do app (RLS por `user_id`) continua igual, sem mudança nos registros.
-- No cadastro, se o número ainda não tem conta, o servidor cria o usuário via Auth Admin (confirmado, com senha aleatória inacessível) e vincula o passkey.
-- `src/lib/tesouro.ts` ganha `criarPasskey`, `entrarComPasskey`, mantendo `entrarComNumero` para as contas antigas.
-- `AutenticacaoMembro.tsx` reescrita: campo de número + botões "Entrar" / "Criar meu acesso", detecção de suporte a WebAuthn e mensagens de erro em português.
-- Nova função de servidor `resetarPasskeys` em `moderador.functions.ts`, protegida pela senha do responsável.
+- Biblioteca `@simplewebauthn/browser` (cliente) e `@simplewebauthn/server` (servidor).
+- Novas tabelas no banco:
+  - `passkeys`: `user_id`, `numero`, `credential_id`, `public_key`, `counter`, `transports`; leitura/escrita apenas do próprio usuário.
+  - `passkey_desafios`: desafio temporário por número, com expiração curta; acesso só pelo servidor.
+- Rotas de servidor em `src/routes/api/public/passkey/*`: gerar desafio de cadastro, verificar cadastro, gerar desafio de login, verificar login. A verificação de login emite uma sessão para o usuário correspondente (via Auth Admin), então o app continua usando a mesma sessão de hoje e as mesmas regras de acesso aos registros.
+- `src/lib/tesouro.ts`: novas funções `ativarPasskey()` e `entrarComPasskey(numero)`, mantendo `criarConta` e `entrarComNumero` intactas.
+- `AutenticacaoMembro.tsx`: acrescenta o botão de passkey (escondido quando o aparelho não suporta WebAuthn).
+- `GradeRegistro.tsx`: botão para ativar passkey no aparelho atual.
+- `moderador.functions.ts`: `excluirMembro` também apaga os passkeys do número.
