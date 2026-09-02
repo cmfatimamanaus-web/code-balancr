@@ -223,4 +223,5 @@ export async function entrarComPasskey(numero: string) {
     token_hash: fim.tokenHash,
   });
   if (error) throw error;
+  return { ok: true as const };
 }
