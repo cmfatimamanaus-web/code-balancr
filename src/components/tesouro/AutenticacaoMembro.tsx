@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { COR, criarConta, entrarComNumero } from "@/lib/tesouro";
+import { useEffect, useState } from "react";
+import { COR, criarConta, entrarComNumero, entrarComPasskey, passkeySuportado } from "@/lib/tesouro";
 import { ShieldMark } from "./Shared";
 
 export function AutenticacaoMembro({
