@@ -1,14 +1,14 @@
-import { createServerFn, getRequestHeader } from "@tanstack/react-start";
+import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const RP_NAME = "Tesouro Espiritual";
 
-function origemEId() {
+async function origemEId() {
+  const { getRequestHeader } = await import("@tanstack/start-server-core");
+  const referer = getRequestHeader("referer");
   const origin =
     getRequestHeader("origin") ??
-    (getRequestHeader("referer")
-      ? new URL(getRequestHeader("referer") as string).origin
-      : "http://localhost:8080");
+    (referer ? new URL(referer).origin : "http://localhost:8080");
   const rpID = new URL(origin).hostname;
   return { origin, rpID };
 }
@@ -24,7 +24,7 @@ export const iniciarCadastroPasskey = createServerFn({ method: "POST" })
   .handler(async ({ context }) => {
     const { generateRegistrationOptions } = await import("@simplewebauthn/server");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { origin, rpID } = origemEId();
+    const { origin, rpID } = await origemEId();
 
     const { data: user } = await supabaseAdmin.auth.admin.getUserById(context.userId);
     const numero = normalizar(
@@ -72,7 +72,7 @@ export const concluirCadastroPasskey = createServerFn({ method: "POST" })
     const { verifyRegistrationResponse } = await import("@simplewebauthn/server");
     const { isoBase64URL } = await import("@simplewebauthn/server/helpers");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { origin, rpID } = origemEId();
+    const { origin, rpID } = await origemEId();
 
     const { data: linha } = await supabaseAdmin
       .from("passkey_desafios")
@@ -114,7 +114,7 @@ export const iniciarLoginPasskey = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { generateAuthenticationOptions } = await import("@simplewebauthn/server");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { rpID } = origemEId();
+    const { rpID } = await origemEId();
     const numero = normalizar(data.numero);
 
     const { data: creds } = await supabaseAdmin
@@ -149,7 +149,7 @@ export const concluirLoginPasskey = createServerFn({ method: "POST" })
     const { verifyAuthenticationResponse } = await import("@simplewebauthn/server");
     const { isoBase64URL } = await import("@simplewebauthn/server/helpers");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { origin, rpID } = origemEId();
+    const { origin, rpID } = await origemEId();
 
     const { data: linha } = await supabaseAdmin
       .from("passkey_desafios")
