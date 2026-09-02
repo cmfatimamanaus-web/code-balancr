@@ -185,3 +185,39 @@ export function percentuaisDoMes(
     percentual: base > 0 ? Math.round(((somas[col.id] ?? 0) / base) * 1000) / 10 : 0,
   }));
 }
+
+/* ============ Passkey (WebAuthn) ============ */
+
+export async function passkeySuportado() {
+  if (typeof window === "undefined") return false;
+  return !!window.PublicKeyCredential;
+}
+
+export async function ativarPasskey() {
+  const { startRegistration } = await import("@simplewebauthn/browser");
+  const { iniciarCadastroPasskey, concluirCadastroPasskey } = await import(
+    "@/lib/passkey.functions"
+  );
+  const inicio = await iniciarCadastroPasskey();
+  const resposta = await startRegistration({ optionsJSON: inicio.options as never });
+  await concluirCadastroPasskey({
+    data: { desafioId: inicio.desafioId, resposta, numero: inicio.numero },
+  });
+}
+
+export async function entrarComPasskey(numero: string) {
+  const { startAuthentication } = await import("@simplewebauthn/browser");
+  const { iniciarLoginPasskey, concluirLoginPasskey } = await import(
+    "@/lib/passkey.functions"
+  );
+  const inicio = await iniciarLoginPasskey({ data: { numero: normalizarNumero(numero) } });
+  const resposta = await startAuthentication({ optionsJSON: inicio.options as never });
+  const fim = await concluirLoginPasskey({
+    data: { desafioId: inicio.desafioId, resposta },
+  });
+  const { error } = await supabase.auth.verifyOtp({
+    type: "magiclink",
+    token_hash: fim.tokenHash,
+  });
+  if (error) throw error;
+}
