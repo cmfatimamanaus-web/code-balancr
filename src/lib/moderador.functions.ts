@@ -37,6 +37,10 @@ export const excluirMembro = createServerFn({ method: "POST" })
       .delete()
       .eq("numero", data.numero);
     if (error) throw new Error(error.message);
+    await supabaseAdmin
+      .from("passkeys")
+      .delete()
+      .eq("numero", data.numero.trim().toLowerCase());
     return { ok: true };
   });
 
