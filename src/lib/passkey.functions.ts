@@ -122,7 +122,7 @@ export const iniciarLoginPasskey = createServerFn({ method: "POST" })
       .select("credential_id, transports")
       .eq("numero", numero);
     if (!creds || creds.length === 0)
-      throw new Error("Nenhum passkey cadastrado para esse número.");
+      return { erro: "Nenhum passkey cadastrado para esse número." as const };
 
     const options = await generateAuthenticationOptions({
       rpID,
