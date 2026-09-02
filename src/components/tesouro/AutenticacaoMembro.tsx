@@ -26,7 +26,11 @@ export function AutenticacaoMembro({
     if (!numero.trim()) return setErro("Informe o seu número.");
     setCarregando(true);
     try {
-      await entrarComPasskey(numero);
+      const r = await entrarComPasskey(numero);
+      if (!r.ok) {
+        setErro(r.erro);
+        return;
+      }
       onEntrou();
     } catch (e) {
       const msg = String((e as Error)?.message ?? "");

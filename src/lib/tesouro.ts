@@ -211,6 +211,9 @@ export async function entrarComPasskey(numero: string) {
     "@/lib/passkey.functions"
   );
   const inicio = await iniciarLoginPasskey({ data: { numero: normalizarNumero(numero) } });
+  if ("erro" in inicio && inicio.erro) return { ok: false as const, erro: inicio.erro };
+  if (!("options" in inicio) || !inicio.options || !inicio.desafioId)
+    return { ok: false as const, erro: "Nenhum passkey cadastrado para esse número." };
   const resposta = await startAuthentication({ optionsJSON: inicio.options as never });
   const fim = await concluirLoginPasskey({
     data: { desafioId: inicio.desafioId, resposta },
@@ -220,4 +223,5 @@ export async function entrarComPasskey(numero: string) {
     token_hash: fim.tokenHash,
   });
   if (error) throw error;
+  return { ok: true as const };
 }
