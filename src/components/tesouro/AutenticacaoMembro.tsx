@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { COR, criarConta, entrarComNumero } from "@/lib/tesouro";
+import { useEffect, useState } from "react";
+import { COR, criarConta, entrarComNumero, entrarComPasskey, passkeySuportado } from "@/lib/tesouro";
 import { ShieldMark } from "./Shared";
 
 export function AutenticacaoMembro({
@@ -15,6 +15,27 @@ export function AutenticacaoMembro({
   const [confirmar, setConfirmar] = useState("");
   const [erro, setErro] = useState("");
   const [carregando, setCarregando] = useState(false);
+  const [temPasskey, setTemPasskey] = useState(false);
+
+  useEffect(() => {
+    void passkeySuportado().then(setTemPasskey);
+  }, []);
+
+  const entrarPasskey = async () => {
+    setErro("");
+    if (!numero.trim()) return setErro("Informe o seu número.");
+    setCarregando(true);
+    try {
+      await entrarComPasskey(numero);
+      onEntrou();
+    } catch (e) {
+      const msg = String((e as Error)?.message ?? "");
+      if (/Nenhum passkey/i.test(msg)) setErro("Nenhum passkey cadastrado para esse número.");
+      else setErro("Não foi possível entrar com passkey. Use a senha.");
+    } finally {
+      setCarregando(false);
+    }
+  };
 
   const enviar = async () => {
     setErro("");
@@ -126,6 +147,17 @@ export function AutenticacaoMembro({
         >
           {carregando ? "Aguarde..." : modo === "criar" ? "Criar e entrar" : "Entrar"}
         </button>
+
+        {modo === "entrar" && temPasskey && (
+          <button
+            disabled={carregando}
+            onClick={entrarPasskey}
+            className="w-full mt-3 py-3.5 rounded-lg font-medium text-base border transition active:scale-[0.98] disabled:opacity-50"
+            style={{ borderColor: `${COR.navy}33`, color: COR.navyDeep, background: COR.ivory }}
+          >
+            Entrar com passkey
+          </button>
+        )}
 
         <p className="mt-6 text-xs leading-relaxed" style={{ color: `${COR.navyDeep}99` }}>
           Cada membro vê apenas o seu próprio tesouro espiritual. Guarde bem a sua senha:
