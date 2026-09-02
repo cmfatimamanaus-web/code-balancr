@@ -15,6 +15,27 @@ export function AutenticacaoMembro({
   const [confirmar, setConfirmar] = useState("");
   const [erro, setErro] = useState("");
   const [carregando, setCarregando] = useState(false);
+  const [temPasskey, setTemPasskey] = useState(false);
+
+  useEffect(() => {
+    void passkeySuportado().then(setTemPasskey);
+  }, []);
+
+  const entrarPasskey = async () => {
+    setErro("");
+    if (!numero.trim()) return setErro("Informe o seu número.");
+    setCarregando(true);
+    try {
+      await entrarComPasskey(numero);
+      onEntrou();
+    } catch (e) {
+      const msg = String((e as Error)?.message ?? "");
+      if (/Nenhum passkey/i.test(msg)) setErro("Nenhum passkey cadastrado para esse número.");
+      else setErro("Não foi possível entrar com passkey. Use a senha.");
+    } finally {
+      setCarregando(false);
+    }
+  };
 
   const enviar = async () => {
     setErro("");
