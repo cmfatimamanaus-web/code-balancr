@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import { COR, criarConta, entrarComNumero, entrarComPasskey, passkeySuportado } from "@/lib/tesouro";
 import { ShieldMark } from "./Shared";
 
