@@ -11,7 +11,8 @@ export function LoginModerador({
   onVoltar: () => void;
   erro: string;
 }) {
-  const [senha, setSenha] = useState("");
+    const [senha, setSenha] = useState("");
+  const [mostrarSenha, setMostrarSenha] = useState(false);
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-6" style={{ background: COR.navyDeep }}>
       <div className="max-w-xs w-full">
