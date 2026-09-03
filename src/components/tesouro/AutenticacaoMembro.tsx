@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import { COR, criarConta, entrarComNumero, entrarComPasskey, passkeySuportado } from "@/lib/tesouro";
 import { ShieldMark } from "./Shared";
 
@@ -11,8 +12,10 @@ export function AutenticacaoMembro({
 }) {
   const [modo, setModo] = useState<"entrar" | "criar">("entrar");
   const [numero, setNumero] = useState("");
-  const [senha, setSenha] = useState("");
+    const [senha, setSenha] = useState("");
   const [confirmar, setConfirmar] = useState("");
+  const [mostrarSenha, setMostrarSenha] = useState(false);
+  const [mostrarConfirmar, setMostrarConfirmar] = useState(false);
   const [erro, setErro] = useState("");
   const [carregando, setCarregando] = useState(false);
   const [temPasskey, setTemPasskey] = useState(false);
@@ -119,25 +122,49 @@ export function AutenticacaoMembro({
         />
 
         <label className="block text-sm mb-1.5" style={{ color: COR.navyDeep }}>Senha</label>
-        <input
-          type="password"
-          value={senha}
-          onChange={(e) => setSenha(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && modo === "entrar" && enviar()}
-          className="w-full px-4 py-3 rounded-lg border text-base mb-4 outline-none"
-          style={{ borderColor: `${COR.navy}33`, background: COR.ivory, color: COR.ink }}
-        />
+                <div className="relative mb-4">
+          <input
+            type={mostrarSenha ? "text" : "password"}
+            value={senha}
+            onChange={(e) => setSenha(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && modo === "entrar" && enviar()}
+            className="w-full px-4 py-3 pr-12 rounded-lg border text-base outline-none"
+            style={{ borderColor: `${COR.navy}33`, background: COR.ivory, color: COR.ink }}
+          />
+          <button
+            type="button"
+            onClick={() => setMostrarSenha((visivel) => !visivel)}
+            className="absolute right-3 top-1/2 -translate-y-1/2"
+            aria-label={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}
+            title={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}
+            style={{ color: COR.navyDeep }}
+          >
+            {mostrarSenha ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
+        </div>
 
         {modo === "criar" && (
           <>
             <label className="block text-sm mb-1.5" style={{ color: COR.navyDeep }}>Confirmar senha</label>
-            <input
-              type="password"
-              value={confirmar}
-              onChange={(e) => setConfirmar(e.target.value)}
-              className="w-full px-4 py-3 rounded-lg border text-base mb-4 outline-none"
-              style={{ borderColor: `${COR.navy}33`, background: COR.ivory, color: COR.ink }}
-            />
+                        <div className="relative mb-4">
+              <input
+                type={mostrarConfirmar ? "text" : "password"}
+                value={confirmar}
+                onChange={(e) => setConfirmar(e.target.value)}
+                className="w-full px-4 py-3 pr-12 rounded-lg border text-base outline-none"
+                style={{ borderColor: `${COR.navy}33`, background: COR.ivory, color: COR.ink }}
+              />
+              <button
+                type="button"
+                onClick={() => setMostrarConfirmar((visivel) => !visivel)}
+                className="absolute right-3 top-1/2 -translate-y-1/2"
+                aria-label={mostrarConfirmar ? "Ocultar senha" : "Mostrar senha"}
+                title={mostrarConfirmar ? "Ocultar senha" : "Mostrar senha"}
+                style={{ color: COR.navyDeep }}
+              >
+                {mostrarConfirmar ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
           </>
         )}
 
