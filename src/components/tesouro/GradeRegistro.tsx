@@ -149,7 +149,7 @@ export function GradeRegistro({
                         <thead className="sticky top-0 z-20">
               <tr>
                 <th
-                  className="sticky left-0 z-10 px-2 py-2 text-xs font-medium text-left"
+                                    className="sticky left-0 z-30 px-2 py-2 text-xs font-medium text-left"
                   style={{ background: COR.navy, color: COR.ivory, minWidth: 44 }}
                 >
                   Dia
