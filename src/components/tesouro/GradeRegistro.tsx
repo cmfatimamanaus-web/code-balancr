@@ -55,8 +55,8 @@ export function GradeRegistro({
 
   return (
     <div className="min-h-screen pb-24" style={{ background: COR.cream }}>
-      <div
-        className="sticky top-0 z-20 px-4 pt-4 pb-3"
+            <div
+        className="z-20 px-4 pt-4 pb-3"
         style={{ background: COR.navyDeep, boxShadow: "0 2px 10px rgba(0,0,0,0.25)" }}
       >
         <div className="flex items-center justify-between mb-2">
