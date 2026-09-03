@@ -46,9 +46,18 @@ export function PainelModerador({ senha, onSair }: { senha: string; onSair: () =
     }
   }, [mesIndex, ano, senha, buscar]);
 
-  useEffect(() => {
+    useEffect(() => {
     carregar();
+    const intervalo = window.setInterval(carregar, 10000);
+    const aoVoltarParaPagina = () => carregar();
+    window.addEventListener("focus", aoVoltarParaPagina);
+    return () => {
+      window.clearInterval(intervalo);
+      window.removeEventListener("focus", aoVoltarParaPagina);
+    };
   }, [carregar]);
+
+
 
 
   const removerMembro = async (num: string) => {
