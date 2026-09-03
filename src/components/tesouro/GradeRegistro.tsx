@@ -118,7 +118,7 @@ export function GradeRegistro({
       <div className="px-2 pt-3">
         <div className="overflow-x-auto rounded-lg border" style={{ borderColor: `${COR.navy}22` }}>
           <table className="border-collapse" style={{ minWidth: 780 }}>
-            <thead>
+                        <thead className="sticky top-0 z-20">
               <tr>
                 <th
                   className="sticky left-0 z-10 px-2 py-2 text-xs font-medium text-left"
