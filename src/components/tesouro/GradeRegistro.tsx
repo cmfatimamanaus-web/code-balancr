@@ -29,8 +29,9 @@ export function GradeRegistro({
   const totais = useMemo(() => calcularTotais(dias), [dias]);
   const totalGeral = COLUMNS.reduce((s, c) => s + (totais[c.id] || 0), 0);
 
-  const [temPasskey, setTemPasskey] = useState(false);
+    const [temPasskey, setTemPasskey] = useState(false);
   const [statusPasskey, setStatusPasskey] = useState("");
+  const [escalaTabela, setEscalaTabela] = useState(1);
 
   useEffect(() => {
     void passkeySuportado().then(setTemPasskey);
@@ -88,9 +89,37 @@ export function GradeRegistro({
             style={{ background: COR.ivory, color: COR.ink }}
           />
         </div>
-        <div className="flex items-center justify-between text-xs" style={{ color: COR.goldSoft }}>
+                <div className="flex items-center justify-between text-xs" style={{ color: COR.goldSoft }}>
           <span>{salvando ? "Salvando…" : "Salvo"}</span>
           <span>Total do mês: <b style={{ color: COR.gold }}>{totalGeral}</b></span>
+        </div>
+        <div className="mt-2 flex items-center justify-between gap-2">
+          <span className="text-xs" style={{ color: COR.goldSoft }}>Zoom da tabela</span>
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => setEscalaTabela((atual) => Math.max(0.8, atual - 0.1))}
+              disabled={escalaTabela <= 0.8}
+              className="h-7 w-7 rounded-md border text-base disabled:opacity-40"
+              style={{ borderColor: `${COR.goldSoft}55`, color: COR.goldSoft }}
+              aria-label="Diminuir zoom da tabela"
+            >
+              −
+            </button>
+            <span className="w-12 text-center text-xs" style={{ color: COR.ivory }}>
+              {Math.round(escalaTabela * 100)}%
+            </span>
+            <button
+              type="button"
+              onClick={() => setEscalaTabela((atual) => Math.min(1.2, atual + 0.1))}
+              disabled={escalaTabela >= 1.2}
+              className="h-7 w-7 rounded-md border text-base disabled:opacity-40"
+              style={{ borderColor: `${COR.goldSoft}55`, color: COR.goldSoft }}
+              aria-label="Aumentar zoom da tabela"
+            >
+              +
+            </button>
+          </div>
         </div>
         {temPasskey && (
           <div className="mt-2 flex items-center justify-between gap-2">
@@ -116,8 +145,8 @@ export function GradeRegistro({
 
       <div className="px-2 pt-3">
         <div className="overflow-x-auto rounded-lg border" style={{ borderColor: `${COR.navy}22` }}>
-          <table className="border-collapse" style={{ minWidth: 780 }}>
-            <thead>
+                    <table className="border-collapse" style={{ minWidth: 780, zoom: escalaTabela }}>
+                        <thead className="sticky top-0 z-20">
               <tr>
                 <th
                   className="sticky left-0 z-10 px-2 py-2 text-xs font-medium text-left"
