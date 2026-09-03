@@ -29,8 +29,9 @@ export function GradeRegistro({
   const totais = useMemo(() => calcularTotais(dias), [dias]);
   const totalGeral = COLUMNS.reduce((s, c) => s + (totais[c.id] || 0), 0);
 
-  const [temPasskey, setTemPasskey] = useState(false);
+    const [temPasskey, setTemPasskey] = useState(false);
   const [statusPasskey, setStatusPasskey] = useState("");
+  const [escalaTabela, setEscalaTabela] = useState(1);
 
   useEffect(() => {
     void passkeySuportado().then(setTemPasskey);
