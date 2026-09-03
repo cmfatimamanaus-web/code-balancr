@@ -24,15 +24,27 @@ export function LoginModerador({
             Acesso do responsável
           </h2>
         </div>
-        <input
-          type="password"
-          value={senha}
-          onChange={(e) => setSenha(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && onEntrar(senha)}
-          placeholder="Senha"
-          className="w-full px-4 py-3 rounded-lg border text-base mb-3 outline-none"
-          style={{ background: COR.ivory, borderColor: `${COR.gold}55`, color: COR.ink }}
-        />
+                <div className="relative mb-3">
+          <input
+            type={mostrarSenha ? "text" : "password"}
+            value={senha}
+            onChange={(e) => setSenha(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && onEntrar(senha)}
+            placeholder="Senha"
+            className="w-full px-4 py-3 pr-12 rounded-lg border text-base outline-none"
+            style={{ background: COR.ivory, borderColor: `${COR.gold}55`, color: COR.ink }}
+          />
+          <button
+            type="button"
+            onClick={() => setMostrarSenha((visivel) => !visivel)}
+            className="absolute right-3 top-1/2 -translate-y-1/2"
+            aria-label={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}
+            title={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}
+            style={{ color: COR.navyDeep }}
+          >
+            {mostrarSenha ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
+        </div>
         {erro && <p className="text-sm mb-3" style={{ color: "#F3A6A6" }}>{erro}</p>}
         <button
           onClick={() => onEntrar(senha)}
