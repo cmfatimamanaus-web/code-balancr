@@ -89,9 +89,37 @@ export function GradeRegistro({
             style={{ background: COR.ivory, color: COR.ink }}
           />
         </div>
-        <div className="flex items-center justify-between text-xs" style={{ color: COR.goldSoft }}>
+                <div className="flex items-center justify-between text-xs" style={{ color: COR.goldSoft }}>
           <span>{salvando ? "Salvando…" : "Salvo"}</span>
           <span>Total do mês: <b style={{ color: COR.gold }}>{totalGeral}</b></span>
+        </div>
+        <div className="mt-2 flex items-center justify-between gap-2">
+          <span className="text-xs" style={{ color: COR.goldSoft }}>Zoom da tabela</span>
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => setEscalaTabela((atual) => Math.max(0.8, atual - 0.1))}
+              disabled={escalaTabela <= 0.8}
+              className="h-7 w-7 rounded-md border text-base disabled:opacity-40"
+              style={{ borderColor: `${COR.goldSoft}55`, color: COR.goldSoft }}
+              aria-label="Diminuir zoom da tabela"
+            >
+              −
+            </button>
+            <span className="w-12 text-center text-xs" style={{ color: COR.ivory }}>
+              {Math.round(escalaTabela * 100)}%
+            </span>
+            <button
+              type="button"
+              onClick={() => setEscalaTabela((atual) => Math.min(1.2, atual + 0.1))}
+              disabled={escalaTabela >= 1.2}
+              className="h-7 w-7 rounded-md border text-base disabled:opacity-40"
+              style={{ borderColor: `${COR.goldSoft}55`, color: COR.goldSoft }}
+              aria-label="Aumentar zoom da tabela"
+            >
+              +
+            </button>
+          </div>
         </div>
         {temPasskey && (
           <div className="mt-2 flex items-center justify-between gap-2">
