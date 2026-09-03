@@ -11,8 +11,10 @@ export function AutenticacaoMembro({
 }) {
   const [modo, setModo] = useState<"entrar" | "criar">("entrar");
   const [numero, setNumero] = useState("");
-  const [senha, setSenha] = useState("");
+    const [senha, setSenha] = useState("");
   const [confirmar, setConfirmar] = useState("");
+  const [mostrarSenha, setMostrarSenha] = useState(false);
+  const [mostrarConfirmar, setMostrarConfirmar] = useState(false);
   const [erro, setErro] = useState("");
   const [carregando, setCarregando] = useState(false);
   const [temPasskey, setTemPasskey] = useState(false);
