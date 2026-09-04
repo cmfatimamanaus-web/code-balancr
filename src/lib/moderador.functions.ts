@@ -11,7 +11,8 @@ export const consolidadoModerador = createServerFn({ method: "POST" })
   .inputValidator((input: Payload) => input)
   .handler(async ({ data }) => {
     validarSenha(data.senha);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { getAdminClient } = await import("@/lib/supabase-admin.server");
+    const supabaseAdmin = getAdminClient();
 
     let query = supabaseAdmin.from("registros").select("numero, mes_ano, dias");
     if (data.mesAno) query = query.eq("mes_ano", data.mesAno);
@@ -31,7 +32,8 @@ export const excluirMembro = createServerFn({ method: "POST" })
   .inputValidator((input: { senha: string; numero: string }) => input)
   .handler(async ({ data }) => {
     validarSenha(data.senha);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { getAdminClient } = await import("@/lib/supabase-admin.server");
+    const supabaseAdmin = getAdminClient();
     const { error } = await supabaseAdmin
       .from("registros")
       .delete()
@@ -49,4 +51,28 @@ export const verificarSenhaModerador = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const esperada = process.env["MODERADOR_SENHA"] ?? "responsavel2026";
     return { ok: data.senha === esperada };
+  });
+
+/** Diagnóstico: confirma se o servidor enxerga as variáveis e acessa a tabela. */
+export const diagnosticoBackend = createServerFn({ method: "POST" })
+  .inputValidator((input: { senha: string }) => input)
+  .handler(async ({ data }) => {
+    validarSenha(data.senha);
+    const temUrl = Boolean(process.env["SUPABASE_URL"] || process.env["VITE_SUPABASE_URL"]);
+    const temChave = Boolean(process.env["SUPABASE_SERVICE_ROLE_KEY"]);
+    try {
+      const { getAdminClient } = await import("@/lib/supabase-admin.server");
+      const { count, error } = await getAdminClient()
+        .from("registros")
+        .select("id", { count: "exact", head: true });
+      if (error) throw new Error(error.message);
+      return { temUrl, temChave, registros: count ?? 0, erro: null as string | null };
+    } catch (e) {
+      return {
+        temUrl,
+        temChave,
+        registros: null as number | null,
+        erro: e instanceof Error ? e.message : String(e),
+      };
+    }
   });
