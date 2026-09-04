@@ -39,8 +39,13 @@ export function PainelModerador({ senha, onSair }: { senha: string; onSair: () =
           .sort((a, b) => a.numero.localeCompare(b.numero, undefined, { numeric: true })),
       );
       setAnoDados(doAno.map((r) => ({ ...r, dias: (r.dias || {}) as Dias })));
-    } catch {
-      setErro("Não foi possível carregar os dados agora.");
+    } catch (e) {
+      const detalhe = e instanceof Error ? e.message : "";
+      setErro(
+        detalhe
+          ? `Não foi possível carregar os dados agora. (${detalhe})`
+          : "Não foi possível carregar os dados agora.",
+      );
     } finally {
       setCarregando(false);
     }
