@@ -18,11 +18,6 @@ export function AutenticacaoMembro({
   const [mostrarConfirmar, setMostrarConfirmar] = useState(false);
   const [erro, setErro] = useState("");
   const [carregando, setCarregando] = useState(false);
-  const [temPasskey, setTemPasskey] = useState(false);
-
-  useEffect(() => {
-    void passkeySuportado().then(setTemPasskey);
-  }, []);
 
   const entrarPasskey = async () => {
     setErro("");
