@@ -155,16 +155,6 @@ export function AutenticacaoMembro({
           {carregando ? "Aguarde..." : modo === "criar" ? "Criar e entrar" : "Entrar"}
         </button>
 
-        {modo === "entrar" && temPasskey && (
-          <button
-            disabled={carregando}
-            onClick={entrarPasskey}
-            className="w-full mt-3 py-3.5 rounded-lg font-medium text-base border transition active:scale-[0.98] disabled:opacity-50"
-            style={{ borderColor: `${COR.navy}33`, color: COR.navyDeep, background: COR.ivory }}
-          >
-            Entrar com passkey
-          </button>
-        )}
 
         <p className="mt-6 text-xs leading-relaxed" style={{ color: `${COR.navyDeep}99` }}>
           Cada membro vê apenas o seu próprio tesouro espiritual. Guarde bem a sua senha:
