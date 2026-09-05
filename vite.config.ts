@@ -4,7 +4,4 @@ export default defineConfig({
   tanstackStart: {
     server: { entry: "server" },
   },
-  optimizeDeps: {
-    exclude: ["@tanstack/start-server-core", "@tanstack/react-start/server-entry"],
-  },
 });
