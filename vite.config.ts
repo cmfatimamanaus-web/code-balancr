@@ -4,12 +4,14 @@ export default defineConfig({
   tanstackStart: {
     server: { entry: "server" },
   },
-  optimizeDeps: {
-    // Pacotes exclusivos de servidor: nunca devem entrar no pré-bundle do cliente.
-    exclude: [
-      "@tanstack/start-server-core",
-      "@simplewebauthn/server",
-      "@simplewebauthn/server/helpers",
-    ],
+  vite: {
+    optimizeDeps: {
+      // Pacotes exclusivos do servidor: fora do pré-bundle do navegador.
+      exclude: [
+        "@tanstack/start-server-core",
+        "@simplewebauthn/server",
+        "@simplewebauthn/server/helpers",
+      ],
+    },
   },
 });
