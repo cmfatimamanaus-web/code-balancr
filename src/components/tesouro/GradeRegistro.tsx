@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { COLUMNS, COR, MESES, ativarPasskey, calcularTotais, diasNoMes, passkeySuportado, type Dias } from "@/lib/tesouro";
+import React, {  useMemo, useState } from "react";
+import { COLUMNS, COR, MESES,  calcularTotais, diasNoMes,  type Dias } from "@/lib/tesouro";
 import { CelulaCheck, CelulaNumero } from "./Shared";
 
 export function GradeRegistro({
@@ -29,23 +29,9 @@ export function GradeRegistro({
   const totais = useMemo(() => calcularTotais(dias), [dias]);
   const totalGeral = COLUMNS.reduce((s, c) => s + (totais[c.id] || 0), 0);
 
-    const [temPasskey, setTemPasskey] = useState(false);
-  const [statusPasskey, setStatusPasskey] = useState("");
   const [escalaTabela, setEscalaTabela] = useState(1);
 
-  useEffect(() => {
-    void passkeySuportado().then(setTemPasskey);
-  }, []);
 
-  const registrarPasskey = async () => {
-    setStatusPasskey("Aguarde…");
-    try {
-      await ativarPasskey();
-      setStatusPasskey("Passkey ativado neste aparelho.");
-    } catch {
-      setStatusPasskey("Não foi possível ativar o passkey.");
-    }
-  };
 
   const gruposDecada = [
     { inicio: 1, fim: Math.min(10, totalDias), label: "1ª dezena" },
@@ -121,20 +107,6 @@ export function GradeRegistro({
             </button>
           </div>
         </div>
-        {temPasskey && (
-          <div className="mt-2 flex items-center justify-between gap-2">
-            <button
-              onClick={registrarPasskey}
-              className="text-xs px-3 py-1.5 rounded-md border"
-              style={{ borderColor: `${COR.goldSoft}55`, color: COR.goldSoft }}
-            >
-              Ativar passkey neste aparelho
-            </button>
-            {statusPasskey && (
-              <span className="text-xs" style={{ color: `${COR.ivory}99` }}>{statusPasskey}</span>
-            )}
-          </div>
-        )}
       </div>
 
       {erro && (
