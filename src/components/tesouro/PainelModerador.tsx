@@ -29,10 +29,13 @@ export function PainelModerador({ senha, onSair }: { senha: string; onSair: () =
     setCarregando(true);
     setErro("");
     try {
-      const [doMes, doAno] = await Promise.all([
-        buscar({ data: { senha, mesAno: mesAnoKey(mesIndex, ano) } }),
-        buscar({ data: { senha, ano } }),
-      ]);
+      const doMes = await buscar({
+  data: { senha, mesAno: mesAnoKey(mesIndex, ano) },
+});
+
+const doAno = await buscar({
+  data: { senha, ano },
+});
       setRegistros(
         doMes
           .map((r) => ({ numero: r.numero, dias: (r.dias || {}) as Dias }))
