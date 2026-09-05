@@ -19,25 +19,6 @@ export function AutenticacaoMembro({
   const [erro, setErro] = useState("");
   const [carregando, setCarregando] = useState(false);
 
-  const entrarPasskey = async () => {
-    setErro("");
-    if (!numero.trim()) return setErro("Informe o seu número.");
-    setCarregando(true);
-    try {
-      const r = await entrarComPasskey(numero);
-      if (!r.ok) {
-        setErro(r.erro);
-        return;
-      }
-      onEntrou();
-    } catch (e) {
-      const msg = String((e as Error)?.message ?? "");
-      if (/Nenhum passkey/i.test(msg)) setErro("Nenhum passkey cadastrado para esse número.");
-      else setErro("Não foi possível entrar com passkey. Use a senha.");
-    } finally {
-      setCarregando(false);
-    }
-  };
 
   const enviar = async () => {
     setErro("");
