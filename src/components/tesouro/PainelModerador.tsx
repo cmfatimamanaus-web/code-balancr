@@ -8,7 +8,11 @@ import {
   mesAnoKey,
   type Dias,
 } from "@/lib/tesouro";
-import { consolidadoModerador, excluirMembro } from "@/lib/moderador.functions";
+import {
+  consolidadoModerador,
+  excluirMembro,
+  diagnosticoBackend,
+} from "@/lib/moderador.functions";
 import { ShieldMark } from "./Shared";
 import { GraficosModerador, type RegistroAno } from "./GraficosModerador";
 
@@ -23,6 +27,7 @@ export function PainelModerador({ senha, onSair }: { senha: string; onSair: () =
   const [erro, setErro] = useState("");
   const buscar = useServerFn(consolidadoModerador);
   const excluir = useServerFn(excluirMembro);
+  const diagnosticar = useServerFn(diagnosticoBackend);
   const [excluindo, setExcluindo] = useState("");
 
   const carregar = useCallback(async () => {
@@ -244,6 +249,19 @@ const doAno = await buscar({
         >
           Atualizar
         </button>
+        <button
+  onClick={async () => {
+    try {
+      const resultado = await diagnosticar({ data: { senha } });
+      window.alert(JSON.stringify(resultado, null, 2));
+    } catch (e) {
+      window.alert(e instanceof Error ? e.message : String(e));
+    }
+  }}
+  className="mt-2 text-sm px-4 py-2 rounded-lg border"
+>
+  Diagnóstico
+</button>
       </div>
     </div>
   );
